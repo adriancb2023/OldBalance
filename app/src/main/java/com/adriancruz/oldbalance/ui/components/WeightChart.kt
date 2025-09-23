@@ -4,6 +4,7 @@ import android.graphics.Color
 import android.view.ViewGroup
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.viewinterop.AndroidView
 import com.adriancruz.oldbalance.data.WeightEntry
 import com.adriancruz.oldbalance.data.WeightGoal
@@ -28,7 +29,8 @@ fun WeightChart(
     entries: List<WeightEntry>,
     goals: List<WeightGoal>
 ) {
-    val primaryColor = PrimaryBlue.hashCode()
+    // Convierte el Color de Compose a ARGB de Android (Int)
+    val primaryColor = PrimaryBlue.toArgb()
 
     AndroidView(
         modifier = modifier,
@@ -38,12 +40,15 @@ fun WeightChart(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT
                 )
+
                 description.isEnabled = false
                 setTouchEnabled(true)
                 isDragEnabled = true
                 setScaleEnabled(true)
                 setPinchZoom(true)
+
                 legend.isEnabled = true
+
                 xAxis.position = XAxis.XAxisPosition.BOTTOM
                 xAxis.setDrawGridLines(false)
                 xAxis.valueFormatter = object : ValueFormatter() {
@@ -52,18 +57,24 @@ fun WeightChart(
                         return format.format(Date(value.toLong()))
                     }
                 }
+
                 axisRight.isEnabled = false
                 axisLeft.setDrawGridLines(false)
             }
         },
         update = { chart ->
+            // Si no hay datos, limpiamos el gráfico
             if (entries.isEmpty()) {
                 chart.clear()
                 chart.invalidate()
                 return@AndroidView
             }
 
-            val points = entries.map { Entry(it.date.toFloat(), it.weightKg) }
+            // Mapear entradas a puntos (x = fecha en millis como Float, y = peso)
+            val points: List<Entry> = entries.map { entry ->
+                Entry(entry.date.toFloat(), entry.weightKg.toFloat())
+            }
+
             val set = LineDataSet(points, "Peso").apply {
                 color = primaryColor
                 lineWidth = 2f
@@ -74,17 +85,24 @@ fun WeightChart(
                 circleRadius = 4f
             }
 
-            val dataSets = mutableListOf<ILineDataSet>(set)
+            val dataSets = mutableListOf<ILineDataSet>()
+            dataSets.add(set)
 
+            // Añadir líneas de meta (goals)
             goals.forEach { goal ->
                 val lastX = entries.lastOrNull()?.date?.toFloat() ?: System.currentTimeMillis().toFloat()
                 val firstX = entries.firstOrNull()?.date?.toFloat() ?: (lastX - 7 * 24 * 3600 * 1000f)
                 val linePoints = listOf(
-                    Entry(firstX, goal.targetKg),
-                    Entry(lastX, goal.targetKg)
+                    Entry(firstX, goal.targetKg.toFloat()),
+                    Entry(lastX, goal.targetKg.toFloat())
                 )
                 val gSet = LineDataSet(linePoints, "Meta ${goal.targetKg}kg").apply {
-                    this.color = try { Color.parseColor(goal.colorHex) } catch (e: Exception) { Color.GRAY }
+                    // Color hex defensivo: si falla, usar gris
+                    this.color = try {
+                        Color.parseColor(goal.colorHex)
+                    } catch (e: Exception) {
+                        Color.GRAY
+                    }
                     lineWidth = 1.5f
                     setDrawCircles(false)
                     enableDashedLine(10f, 5f, 0f)
@@ -94,8 +112,10 @@ fun WeightChart(
             }
 
             chart.data = LineData(dataSets)
-            chart.xAxis.axisMinimum = entries.first().date.toFloat()
-            chart.xAxis.axisMaximum = entries.last().date.toFloat()
+            // Protecciones adicionales: setAxisMinimum / setAxisMaximum para asegurar compatibilidad
+            chart.xAxis.setAxisMinimum(entries.first().date.toFloat())
+            chart.xAxis.setAxisMaximum(entries.last().date.toFloat())
+
             chart.notifyDataSetChanged()
             chart.invalidate()
             chart.animateX(700)

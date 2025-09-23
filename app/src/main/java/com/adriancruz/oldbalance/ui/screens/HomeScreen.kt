@@ -14,6 +14,9 @@ import com.adriancruz.oldbalance.ui.components.WeightChart
 import com.adriancruz.oldbalance.ui.viewmodel.MainViewModel
 import java.time.LocalDate
 import java.time.ZoneId
+import androidx.compose.material.LocalContentColor
+import androidx.compose.material.ContentAlpha
+
 
 @Composable
 fun HomeScreen(viewModel: MainViewModel) {
