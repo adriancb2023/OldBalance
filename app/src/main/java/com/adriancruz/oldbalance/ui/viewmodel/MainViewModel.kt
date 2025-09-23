@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -23,6 +24,22 @@ class MainViewModel(private val repo: WeightRepository) : ViewModel() {
 
     val goals: StateFlow<List<WeightGoal>> =
         repo.activeGoalsFlow.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    val weeklyEntries: StateFlow<List<WeightEntry>> = entries.map { it.takeLast(7) }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    val weeklyWeightChange: StateFlow<Float?> = entries.map { allEntries ->
+        if (allEntries.size < 2) {
+            null
+        } else {
+            val last7 = allEntries.takeLast(7)
+            if (last7.size < 2) {
+                null
+            } else {
+                last7.last().weightKg - last7.first().weightKg
+            }
+        }
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     private val _uiEvent = MutableSharedFlow<UiEvent>()
     val uiEvent = _uiEvent.asSharedFlow()
