@@ -6,10 +6,7 @@ import com.adriancruz.oldbalance.data.WeightEntry
 import com.adriancruz.oldbalance.data.WeightGoal
 import com.adriancruz.oldbalance.data.WeightRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 sealed class UiEvent {
@@ -23,6 +20,19 @@ class MainViewModel(private val repo: WeightRepository) : ViewModel() {
 
     val goals: StateFlow<List<WeightGoal>> =
         repo.activeGoalsFlow.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    val totalWeightLoss: StateFlow<Float> =
+        entries.map { entries ->
+            if (entries.size < 2) 0f
+            else entries.first().weightKg - entries.last().weightKg
+        }.stateIn(viewModelScope, SharingStarted.Eagerly, 0f)
+
+    val progressTowardsGoal: StateFlow<Float> =
+        entries.combine(goals) { entries, goals ->
+            if (entries.isEmpty() || goals.isEmpty()) 0f
+            else entries.last().weightKg - goals.first().targetKg
+        }.stateIn(viewModelScope, SharingStarted.Eagerly, 0f)
+
 
     private val _uiEvent = MutableSharedFlow<UiEvent>()
     val uiEvent = _uiEvent.asSharedFlow()
