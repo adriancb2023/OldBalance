@@ -1,9 +1,7 @@
 package com.adriancruz.oldbalance.ui.screens
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -14,8 +12,6 @@ import com.adriancruz.oldbalance.ui.components.WeightChart
 import com.adriancruz.oldbalance.ui.viewmodel.MainViewModel
 import java.time.LocalDate
 import java.time.ZoneId
-import androidx.compose.material.LocalContentColor
-import androidx.compose.material.ContentAlpha
 
 
 @Composable

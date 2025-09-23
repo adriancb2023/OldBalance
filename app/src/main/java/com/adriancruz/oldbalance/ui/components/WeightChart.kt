@@ -1,6 +1,5 @@
 package com.adriancruz.oldbalance.ui.components
 
-import android.graphics.Color
 import android.view.ViewGroup
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -8,7 +7,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.viewinterop.AndroidView
 import com.adriancruz.oldbalance.data.WeightEntry
 import com.adriancruz.oldbalance.data.WeightGoal
-import com.adriancruz.oldbalance.ui.theme.PrimaryBlue
+import com.adriancruz.oldbalance.ui.theme.AppColors
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.Entry
@@ -30,7 +29,7 @@ fun WeightChart(
     goals: List<WeightGoal>
 ) {
     // Convierte el Color de Compose a ARGB de Android (Int)
-    val primaryColor = PrimaryBlue.toArgb()
+    val primaryColor = AppColors.PrimaryBlue.toArgb()  // <-- usamos AppColors
 
     AndroidView(
         modifier = modifier,
@@ -63,14 +62,12 @@ fun WeightChart(
             }
         },
         update = { chart ->
-            // Si no hay datos, limpiamos el gráfico
             if (entries.isEmpty()) {
                 chart.clear()
                 chart.invalidate()
                 return@AndroidView
             }
 
-            // Mapear entradas a puntos (x = fecha en millis como Float, y = peso)
             val points: List<Entry> = entries.map { entry ->
                 Entry(entry.date.toFloat(), entry.weightKg.toFloat())
             }
@@ -88,7 +85,6 @@ fun WeightChart(
             val dataSets = mutableListOf<ILineDataSet>()
             dataSets.add(set)
 
-            // Añadir líneas de meta (goals)
             goals.forEach { goal ->
                 val lastX = entries.lastOrNull()?.date?.toFloat() ?: System.currentTimeMillis().toFloat()
                 val firstX = entries.firstOrNull()?.date?.toFloat() ?: (lastX - 7 * 24 * 3600 * 1000f)
@@ -97,11 +93,10 @@ fun WeightChart(
                     Entry(lastX, goal.targetKg.toFloat())
                 )
                 val gSet = LineDataSet(linePoints, "Meta ${goal.targetKg}kg").apply {
-                    // Color hex defensivo: si falla, usar gris
                     this.color = try {
-                        Color.parseColor(goal.colorHex)
+                        android.graphics.Color.parseColor(goal.colorHex)
                     } catch (e: Exception) {
-                        Color.GRAY
+                        android.graphics.Color.GRAY
                     }
                     lineWidth = 1.5f
                     setDrawCircles(false)
@@ -112,7 +107,6 @@ fun WeightChart(
             }
 
             chart.data = LineData(dataSets)
-            // Protecciones adicionales: setAxisMinimum / setAxisMaximum para asegurar compatibilidad
             chart.xAxis.setAxisMinimum(entries.first().date.toFloat())
             chart.xAxis.setAxisMaximum(entries.last().date.toFloat())
 

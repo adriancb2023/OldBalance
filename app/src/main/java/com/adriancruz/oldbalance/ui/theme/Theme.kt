@@ -7,25 +7,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
 private val HealthyColors = lightColors(
-    primary = PrimaryBlue,
-    primaryVariant = PrimaryBlueVariant,
-    secondary = ProgressOrange,
-    error = AlertRed,
-    background = LightBackground,
-    surface = SurfaceWhite,
-    onPrimary = OnPrimary,
+    primary = AppColors.PrimaryBlue,
+    primaryVariant = AppColors.PrimaryBlueVariant,
+    secondary = AppColors.ProgressOrange,
+    error = AppColors.AlertRed,
+    background = AppColors.LightBackground,
+    surface = AppColors.SurfaceWhite,
+    onPrimary = AppColors.OnPrimary,
     onSecondary = Color.Black,
-    onBackground = TextPrimary,
-    onSurface = TextPrimary,
+    onBackground = AppColors.TextPrimary,
+    onSurface = AppColors.TextPrimary,
     onError = Color.White
 )
 
 @Composable
 fun OldBalanceTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
-    val colors = HealthyColors // For now, we only support the light theme as per the design
-
     MaterialTheme(
-        colors = colors,
+        colors = HealthyColors,
         typography = Typography,
         shapes = Shapes,
         content = content
