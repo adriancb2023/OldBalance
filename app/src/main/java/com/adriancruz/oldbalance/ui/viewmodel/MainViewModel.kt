@@ -22,7 +22,7 @@ class MainViewModel(private val repo: WeightRepository) : ViewModel() {
         repo.allEntriesFlow.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val goals: StateFlow<List<WeightGoal>> =
-        repo.activeGoalsFlow.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+        repo.allGoalsFlow.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     private val _uiEvent = MutableSharedFlow<UiEvent>()
     val uiEvent = _uiEvent.asSharedFlow()
@@ -43,10 +43,9 @@ class MainViewModel(private val repo: WeightRepository) : ViewModel() {
     }
 
     fun addGoal(goal: WeightGoal) {
-        viewModelScope.launch { repo.addOrUpdateGoal(goal) }
-    }
-
-    fun getEtaForGoal(goal: WeightGoal, entries: List<WeightEntry>): com.adriancruz.oldbalance.domain.EtaResult {
-        return com.adriancruz.oldbalance.domain.estimateEta(entries, goal.targetKg)
+        viewModelScope.launch {
+            val lastEntry = entries.value.lastOrNull()
+            repo.addOrUpdateGoal(goal.copy(initialWeight = lastEntry?.weightKg))
+        }
     }
 }
