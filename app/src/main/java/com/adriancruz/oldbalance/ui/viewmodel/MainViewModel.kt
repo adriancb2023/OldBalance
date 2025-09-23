@@ -1,0 +1,52 @@
+package com.adriancruz.oldbalance.ui.viewmodel
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.adriancruz.oldbalance.data.WeightEntry
+import com.adriancruz.oldbalance.data.WeightGoal
+import com.adriancruz.oldbalance.data.WeightRepository
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+
+sealed class UiEvent {
+    object EntryAdded : UiEvent()
+    data class ShowSnackbar(val message: String) : UiEvent()
+}
+
+class MainViewModel(private val repo: WeightRepository) : ViewModel() {
+    val entries: StateFlow<List<WeightEntry>> =
+        repo.allEntriesFlow.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    val goals: StateFlow<List<WeightGoal>> =
+        repo.activeGoalsFlow.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    private val _uiEvent = MutableSharedFlow<UiEvent>()
+    val uiEvent = _uiEvent.asSharedFlow()
+
+    fun addEntry(date: Long, kg: Float, note: String?) {
+        viewModelScope.launch {
+            repo.addOrUpdateEntry(WeightEntry(date = date, weightKg = kg, note = note))
+            _uiEvent.emit(UiEvent.EntryAdded)
+        }
+    }
+
+    fun updateEntry(entry: WeightEntry) {
+        viewModelScope.launch { repo.addOrUpdateEntry(entry) }
+    }
+
+    fun removeEntry(entry: WeightEntry) {
+        viewModelScope.launch { repo.deleteEntry(entry) }
+    }
+
+    fun addGoal(goal: WeightGoal) {
+        viewModelScope.launch { repo.addOrUpdateGoal(goal) }
+    }
+
+    fun getEtaForGoal(goal: WeightGoal, entries: List<WeightEntry>): com.adriancruz.oldbalance.domain.EtaResult {
+        return com.adriancruz.oldbalance.domain.estimateEta(entries, goal.targetKg)
+    }
+}

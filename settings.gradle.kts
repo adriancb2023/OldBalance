@@ -1,12 +1,10 @@
 pluginManagement {
+    plugins {
+        id("com.google.devtools.ksp") version "2.0.21-1.0.17" apply false
+        id("org.jetbrains.kotlin.plugin.compose") version "2.0.21" apply false
+    }
     repositories {
-        google {
-            content {
-                includeGroupByRegex("com\\.android.*")
-                includeGroupByRegex("com\\.google.*")
-                includeGroupByRegex("androidx.*")
-            }
-        }
+        google()
         mavenCentral()
         gradlePluginPortal()
     }
