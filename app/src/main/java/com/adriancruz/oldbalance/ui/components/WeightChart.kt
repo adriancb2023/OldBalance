@@ -46,7 +46,7 @@ fun WeightChart(
                 setScaleEnabled(true)
                 setPinchZoom(true)
 
-                legend.isEnabled = true
+                legend.isEnabled = false
 
                 xAxis.position = XAxis.XAxisPosition.BOTTOM
                 xAxis.setDrawGridLines(false)
@@ -93,11 +93,7 @@ fun WeightChart(
                     Entry(lastX, goal.targetKg.toFloat())
                 )
                 val gSet = LineDataSet(linePoints, "Meta ${goal.targetKg}kg").apply {
-                    this.color = try {
-                        android.graphics.Color.parseColor(goal.colorHex)
-                    } catch (e: Exception) {
-                        android.graphics.Color.GRAY
-                    }
+                    this.color = AppColors.ProgressOrange.toArgb()
                     lineWidth = 1.5f
                     setDrawCircles(false)
                     enableDashedLine(10f, 5f, 0f)
