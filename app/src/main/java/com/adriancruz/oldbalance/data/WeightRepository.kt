@@ -2,7 +2,7 @@ package com.adriancruz.oldbalance.data
 
 class WeightRepository(private val dao: WeightDao) {
     val allEntriesFlow = dao.getAllEntriesFlow()
-    val activeGoalsFlow = dao.getActiveGoalsFlow()
+    val allGoalsFlow = dao.getAllGoalsFlow()
 
     suspend fun addOrUpdateEntry(entry: WeightEntry) {
         if (entry.id == 0L) dao.insertEntry(entry) else dao.updateEntry(entry)

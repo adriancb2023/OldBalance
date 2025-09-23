@@ -31,9 +31,6 @@ interface WeightDao {
     @Update
     suspend fun updateGoal(goal: WeightGoal)
 
-    @Query("SELECT * FROM weight_goals WHERE isActive = 1 ORDER BY createdAt DESC")
-    fun getActiveGoalsFlow(): Flow<List<WeightGoal>>
-
-    @Query("SELECT * FROM weight_goals ORDER BY createdAt DESC")
-    suspend fun getAllGoals(): List<WeightGoal>
+    @Query("SELECT * FROM weight_goals ORDER BY isActive DESC, startDate DESC")
+    fun getAllGoalsFlow(): Flow<List<WeightGoal>>
 }
