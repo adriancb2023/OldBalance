@@ -143,7 +143,7 @@ fun HomeScreen(viewModel: MainViewModel) {
                             horizontalArrangement = Arrangement.SpaceAround
                         ) {
                             SummaryCard(
-                                title = "Pérdida Total",
+                                title = "Peso Perdido",
                                 value = "%.1f kg".format(totalWeightLoss),
                                 icon = Icons.Default.ArrowDownward,
                                 color = AppColors.SuccessGreen,
@@ -151,7 +151,7 @@ fun HomeScreen(viewModel: MainViewModel) {
                             )
                             Spacer(modifier = Modifier.width(16.dp))
                             SummaryCard(
-                                title = "Hacia la Meta",
+                                title = "Por perder:",
                                 value = "%.1f kg".format(progressTowardsGoal),
                                 icon = Icons.Default.Flag,
                                 color = AppColors.ProgressOrange,
@@ -164,6 +164,7 @@ fun HomeScreen(viewModel: MainViewModel) {
         }
     }
 }
+
 
 @Composable
 fun SummaryCard(

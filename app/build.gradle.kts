@@ -54,6 +54,8 @@ android {
 
 dependencies {
 
+    implementation ("androidx.compose.animation:animation-core:1.5.2" )// Ajusta la versión a tu Compose
+
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.9.0")
     implementation("androidx.core:core-ktx:1.12.0")

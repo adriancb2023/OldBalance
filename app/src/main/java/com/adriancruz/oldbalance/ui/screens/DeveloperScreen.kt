@@ -8,6 +8,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.adriancruz.oldbalance.ui.viewmodel.MainViewModel
+import androidx.compose.material.MaterialTheme
+
 
 @Composable
 fun DeveloperScreen(viewModel: MainViewModel) {

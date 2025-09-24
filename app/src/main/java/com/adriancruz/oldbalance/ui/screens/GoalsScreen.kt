@@ -33,7 +33,8 @@ fun GoalsScreen(viewModel: MainViewModel) {
     val goals by viewModel.goals.collectAsState()
     val entries by viewModel.entries.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
-    var isLoading by remember { mutableState of(true) }
+    var isLoading by remember { mutableStateOf(true) }
+
 
     LaunchedEffect(key1 = Unit) {
         viewModel.goals.first()
