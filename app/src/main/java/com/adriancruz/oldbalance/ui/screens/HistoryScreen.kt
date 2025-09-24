@@ -1,15 +1,14 @@
 package com.adriancruz.oldbalance.ui.screens
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -19,18 +18,29 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.adriancruz.oldbalance.data.WeightEntry
+import com.adriancruz.oldbalance.ui.components.Loading
 import com.adriancruz.oldbalance.ui.theme.AppColors
 import com.adriancruz.oldbalance.ui.viewmodel.MainViewModel
+import kotlinx.coroutines.flow.first
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import kotlin.math.abs
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HistoryScreen(viewModel: MainViewModel) {
     val entries by viewModel.entries.collectAsState()
+    var isLoading by remember { mutableStateOf(true) }
 
-    if (entries.isEmpty()) {
+    LaunchedEffect(key1 = Unit) {
+        viewModel.entries.first()
+        isLoading = false
+    }
+
+    if (isLoading) {
+        Loading()
+    } else if (entries.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("No hay registros todavía.")
         }
@@ -44,7 +54,10 @@ fun HistoryScreen(viewModel: MainViewModel) {
                     entry = entry,
                     previousEntry = entries.getOrNull(index + 1),
                     isLastItem = index == entries.lastIndex,
-                    onDelete = { viewModel.removeEntry(entry) }
+                    onDelete = { viewModel.removeEntry(entry) },
+                    modifier = Modifier.animateItemPlacement(
+                        animationSpec = tween(durationMillis = 500)
+                    )
                 )
             }
         }
@@ -56,10 +69,11 @@ fun HistoryItem(
     entry: WeightEntry,
     previousEntry: WeightEntry?,
     isLastItem: Boolean,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.Top
     ) {
         Timeline(isLastItem = isLastItem)

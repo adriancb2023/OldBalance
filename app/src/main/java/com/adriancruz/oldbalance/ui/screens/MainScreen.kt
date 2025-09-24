@@ -1,5 +1,7 @@
 package com.adriancruz.oldbalance.ui.screens
 
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
@@ -46,11 +48,36 @@ fun MainScreen(viewModel: MainViewModel) {
             }
         }
     ) { innerPadding ->
-        NavHost(navController, startDestination = TabItem.Home.route, Modifier.padding(innerPadding)) {
-            composable(TabItem.Home.route) { HomeScreen(viewModel) }
-            composable(TabItem.Add.route) { AddEntryScreen(viewModel) }
-            composable(TabItem.History.route) { HistoryScreen(viewModel) }
-            composable(TabItem.Goals.route) { GoalsScreen(viewModel) }
+        NavHost(
+            navController,
+            startDestination = TabItem.Home.route,
+            modifier = Modifier.padding(innerPadding)
+        ) {
+            composable(
+                TabItem.Home.route,
+                enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) }
+            ) { HomeScreen(viewModel) }
+            composable(
+                TabItem.Add.route,
+                enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) }
+            ) { AddEntryScreen(viewModel) }
+            composable(
+                TabItem.History.route,
+                enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) }
+            ) { HistoryScreen(viewModel) }
+            composable(
+                TabItem.Goals.route,
+                enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) }
+            ) { GoalsScreen(viewModel) }
+            composable(
+                TabItem.Developer.route,
+                enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) }
+            ) { DeveloperScreen(viewModel) }
         }
     }
 }

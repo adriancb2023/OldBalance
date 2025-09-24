@@ -1,29 +1,39 @@
 package com.adriancruz.oldbalance.ui.screens
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.with
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.runtime.*
-import androidx.compose.foundation.background
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.adriancruz.oldbalance.data.WeightGoal
 import com.adriancruz.oldbalance.data.WeightEntry
-import com.adriancruz.oldbalance.ui.theme.AppColors
+import com.adriancruz.oldbalance.data.WeightGoal
 import com.adriancruz.oldbalance.ui.components.ChartRange
+import com.adriancruz.oldbalance.ui.components.Loading
 import com.adriancruz.oldbalance.ui.components.WeightChart
+import com.adriancruz.oldbalance.ui.theme.AppColors
 import com.adriancruz.oldbalance.ui.viewmodel.MainViewModel
+import kotlinx.coroutines.flow.first
 import java.time.LocalDate
 import java.time.ZoneId
 
-
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun HomeScreen(viewModel: MainViewModel) {
     val entries by viewModel.entries.collectAsState()
@@ -31,6 +41,13 @@ fun HomeScreen(viewModel: MainViewModel) {
     val totalWeightLoss by viewModel.totalWeightLoss.collectAsState()
     val progressTowardsGoal by viewModel.progressTowardsGoal.collectAsState()
     var selectedRange by remember { mutableStateOf(ChartRange.ALL) }
+    var isLoading by remember { mutableStateOf(true) }
+
+    LaunchedEffect(key1 = Unit) {
+        // Esperamos a la primera emisión para saber que la carga inicial ha terminado
+        viewModel.entries.first()
+        isLoading = false
+    }
 
     val filteredEntries = remember(entries, selectedRange) {
         filterEntriesByRange(entries, selectedRange)
@@ -40,90 +57,109 @@ fun HomeScreen(viewModel: MainViewModel) {
         modifier = Modifier.fillMaxSize(),
         color = Color(0xFFF0F0F0)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-        ) {
-            Text("Tu Progreso", style = MaterialTheme.typography.h4)
-            Spacer(modifier = Modifier.height(8.dp))
-
-            if (entries.isNotEmpty()) {
-                val latestWeight = entries.last().weightKg
-                Text("Último peso: $latestWeight kg", style = MaterialTheme.typography.h6)
-            } else {
-                Text(
-                    "Registra tu primer peso para ver la gráfica.",
-                    style = MaterialTheme.typography.body1
-                )
+        AnimatedContent(
+            targetState = isLoading,
+            transitionSpec = {
+                fadeIn(animationSpec = tween(300)) with fadeOut(animationSpec = tween(300))
             }
+        ) { loading ->
+            if (loading) {
+                Loading()
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp)
+                ) {
+                    Text("Tu Progreso", style = MaterialTheme.typography.h4)
+                    Spacer(modifier = Modifier.height(8.dp))
 
-            Spacer(modifier = Modifier.height(16.dp))
+                    if (entries.isNotEmpty()) {
+                        val latestWeight = entries.last().weightKg
+                        Text("Último peso: $latestWeight kg", style = MaterialTheme.typography.h6)
+                    } else {
+                        Text(
+                            "Registra tu primer peso para ver la gráfica.",
+                            style = MaterialTheme.typography.body1
+                        )
+                    }
 
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                elevation = 2.dp,
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    if (filteredEntries.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        elevation = 2.dp,
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            if (filteredEntries.isNotEmpty()) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text("Gráfico de Peso", style = MaterialTheme.typography.h6)
+                                    ChartRangeSelector(
+                                        selectedRange = selectedRange,
+                                        onRangeSelected = { selectedRange = it }
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(8.dp))
+                                WeightChart(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(300.dp),
+                                    entries = filteredEntries,
+                                    goals = goals
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                                if (goals.isNotEmpty()) {
+                                    ChartLegend(goal = goals.first())
+                                }
+                            } else {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(300.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text("No hay datos para este período.")
+                                }
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    AnimatedVisibility(
+                        visible = !isLoading,
+                        enter = slideInVertically(
+                            initialOffsetY = { it },
+                            animationSpec = tween(durationMillis = 500, delayMillis = 300)
+                        ) + fadeIn(animationSpec = tween(500, delayMillis = 300))
+                    ) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+                            horizontalArrangement = Arrangement.SpaceAround
                         ) {
-                            Text("Gráfico de Peso", style = MaterialTheme.typography.h6)
-                            ChartRangeSelector(
-                                selectedRange = selectedRange,
-                                onRangeSelected = { selectedRange = it }
+                            SummaryCard(
+                                title = "Pérdida Total",
+                                value = "%.1f kg".format(totalWeightLoss),
+                                icon = Icons.Default.ArrowDownward,
+                                color = AppColors.SuccessGreen,
+                                modifier = Modifier.weight(1f)
                             )
-                        }
-                        Spacer(modifier = Modifier.height(8.dp))
-                        WeightChart(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(300.dp),
-                            entries = filteredEntries,
-                            goals = goals
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        if (goals.isNotEmpty()) {
-                            ChartLegend(goal = goals.first())
-                        }
-                    } else {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(300.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text("No hay datos para este período.")
+                            Spacer(modifier = Modifier.width(16.dp))
+                            SummaryCard(
+                                title = "Hacia la Meta",
+                                value = "%.1f kg".format(progressTowardsGoal),
+                                icon = Icons.Default.Flag,
+                                color = AppColors.ProgressOrange,
+                                modifier = Modifier.weight(1f)
+                            )
                         }
                     }
                 }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceAround
-            ) {
-                SummaryCard(
-                    title = "Pérdida Total",
-                    value = "%.1f kg".format(totalWeightLoss),
-                    icon = Icons.Default.ArrowDownward,
-                    color = AppColors.SuccessGreen,
-                    modifier = Modifier.weight(1f)
-                )
-                Spacer(modifier = Modifier.width(16.dp))
-                SummaryCard(
-                    title = "Hacia la Meta",
-                    value = "%.1f kg".format(progressTowardsGoal),
-                    icon = Icons.Default.Flag,
-                    color = AppColors.ProgressOrange,
-                    modifier = Modifier.weight(1f)
-                )
             }
         }
     }

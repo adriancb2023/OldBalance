@@ -19,6 +19,9 @@ interface WeightDao {
     @Delete
     suspend fun deleteEntry(entry: WeightEntry)
 
+    @Query("DELETE FROM weight_entries")
+    suspend fun deleteAllEntries()
+
     @Query("SELECT * FROM weight_entries ORDER BY date ASC")
     fun getAllEntriesFlow(): Flow<List<WeightEntry>>
 
@@ -30,6 +33,9 @@ interface WeightDao {
 
     @Update
     suspend fun updateGoal(goal: WeightGoal)
+
+    @Query("DELETE FROM weight_goals")
+    suspend fun deleteAllGoals()
 
     @Query("SELECT * FROM weight_goals ORDER BY isActive DESC, startDate DESC")
     fun getAllGoalsFlow(): Flow<List<WeightGoal>>

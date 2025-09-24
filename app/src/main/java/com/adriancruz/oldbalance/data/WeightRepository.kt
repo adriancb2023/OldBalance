@@ -9,7 +9,11 @@ class WeightRepository(private val dao: WeightDao) {
     }
     suspend fun deleteEntry(entry: WeightEntry) = dao.deleteEntry(entry)
 
+    suspend fun deleteAllEntries() = dao.deleteAllEntries()
+
     suspend fun addOrUpdateGoal(goal: WeightGoal) {
         if (goal.id == 0L) dao.insertGoal(goal) else dao.updateGoal(goal)
     }
+
+    suspend fun deleteAllGoals() = dao.deleteAllGoals()
 }

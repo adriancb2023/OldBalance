@@ -11,4 +11,5 @@ sealed class TabItem(val route: String, val icon: ImageVector, val title: String
     object Add : TabItem("add", Icons.Default.AddCircle, "Registrar")
     object History : TabItem("history", Icons.Default.List, "Historial")
     object Goals : TabItem("goals", Icons.Filled.Flag, "Objetivos")
+    object Developer : TabItem("developer", Icons.Default.Build, "Developer")
 }

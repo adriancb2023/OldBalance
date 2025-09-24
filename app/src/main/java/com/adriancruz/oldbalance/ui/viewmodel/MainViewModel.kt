@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.util.Calendar
 
 sealed class UiEvent {
     object EntryAdded : UiEvent()
@@ -28,7 +29,7 @@ class MainViewModel(private val repo: WeightRepository) : ViewModel() {
     // Goals activos (aquí consideramos activo si endDate == null)
     val goals: StateFlow<List<WeightGoal>> =
         repo.allGoalsFlow
-            .map { list -> list.filter { it.endDate == null } }
+            .map { list -> list.filter { it.isActive } }
             .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     // Últimos 7 días de entradas
@@ -89,5 +90,37 @@ class MainViewModel(private val repo: WeightRepository) : ViewModel() {
     // Estimación de ETA para un goal
     fun getEtaForGoal(goal: WeightGoal, entries: List<WeightEntry>): com.adriancruz.oldbalance.domain.EtaResult {
         return com.adriancruz.oldbalance.domain.estimateEta(entries, goal.targetKg)
+    }
+
+    // --- Developer Functions ---
+    fun insertTestData() {
+        viewModelScope.launch {
+            deleteAllData() // Clear existing data first
+
+            val calendar = Calendar.getInstance()
+
+            // Insert weight entries
+            val testEntries = mutableListOf<WeightEntry>()
+            for (i in 0..10) {
+                calendar.add(Calendar.DAY_OF_YEAR, -i)
+                testEntries.add(
+                    WeightEntry(
+                        date = calendar.timeInMillis,
+                        weightKg = 80f - i * 0.5f,
+                        note = "Nota de prueba $i"
+                    )
+                )
+            }
+            testEntries.reversed().forEach { repo.addOrUpdateEntry(it) }
+            _uiEvent.emit(UiEvent.ShowSnackbar("Test data inserted (11 entries)"))
+        }
+    }
+
+    fun deleteAllData() {
+        viewModelScope.launch {
+            repo.deleteAllEntries()
+            repo.deleteAllGoals()
+            _uiEvent.emit(UiEvent.ShowSnackbar("All data deleted"))
+        }
     }
 }

@@ -7,8 +7,6 @@ import com.adriancruz.oldbalance.data.WeightRepository
 
 class WeightApp : Application() {
 
-    // Using by lazy so the database and repository are only created when they're needed
-    // for the first time.
     val database by lazy {
         Room.databaseBuilder(
             this,

@@ -109,6 +109,7 @@ fun WeightChart(
             chart.notifyDataSetChanged()
             chart.invalidate()
             chart.animateX(700)
+            chart.animateY(700)
         }
     )
 }

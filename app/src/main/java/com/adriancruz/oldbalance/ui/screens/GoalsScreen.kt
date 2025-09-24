@@ -1,40 +1,16 @@
 package com.adriancruz.oldbalance.ui.screens
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Button
-import androidx.compose.material.Card
-import androidx.compose.material.Chip
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.FloatingActionButton
-import androidx.compose.material.Icon
-import androidx.compose.material.LinearProgressIndicator
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -43,32 +19,51 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.adriancruz.oldbalance.data.WeightEntry
 import com.adriancruz.oldbalance.data.WeightGoal
+import com.adriancruz.oldbalance.ui.components.Loading
 import com.adriancruz.oldbalance.ui.viewmodel.MainViewModel
+import kotlinx.coroutines.flow.first
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import kotlin.math.roundToInt
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun GoalsScreen(viewModel: MainViewModel) {
     val goals by viewModel.goals.collectAsState()
     val entries by viewModel.entries.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableState of(true) }
+
+    LaunchedEffect(key1 = Unit) {
+        viewModel.goals.first()
+        isLoading = false
+    }
 
     Scaffold(
         floatingActionButton = {
-            FloatingActionButton(onClick = { showDialog = true }) {
-                Icon(Icons.Default.Add, contentDescription = "Añadir objetivo")
+            if (entries.isNotEmpty()) {
+                FloatingActionButton(onClick = { showDialog = true }) {
+                    Icon(Icons.Default.Add, contentDescription = "Añadir objetivo")
+                }
             }
         }
     ) { padding ->
-        if (goals.isEmpty()) {
+        if (isLoading) {
+            Loading()
+        } else if (goals.isEmpty()) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding), contentAlignment = Alignment.Center
             ) {
-                Text("No hay objetivos.")
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("No hay objetivos definidos.")
+                    if (entries.isEmpty()) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("Añade tu primer peso para poder crear un objetivo.")
+                    }
+                }
             }
         } else {
             LazyColumn(
@@ -79,30 +74,46 @@ fun GoalsScreen(viewModel: MainViewModel) {
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(goals, key = { it.id }) { goal ->
-                    GoalCard(goal = goal, entries = entries)
+                    GoalCard(
+                        goal = goal,
+                        entries = entries,
+                        modifier = Modifier.animateItemPlacement()
+                    )
                 }
             }
         }
 
         if (showDialog) {
-            AddGoalDialog(
-                onDismiss = { showDialog = false },
-                onConfirm = { targetKg ->
-                    viewModel.addGoal(WeightGoal(targetKg = targetKg))
-                    showDialog = false
-                }
-            )
+            val lastWeight = entries.lastOrNull()?.weightKg
+            if (lastWeight != null) {
+                AddGoalDialog(
+                    onDismiss = { showDialog = false },
+                    onConfirm = { targetKg ->
+                        viewModel.addGoal(
+                            WeightGoal(
+                                targetKg = targetKg,
+                                initialWeight = lastWeight
+                            )
+                        )
+                        showDialog = false
+                    }
+                )
+            }
         }
     }
 }
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun GoalCard(goal: WeightGoal, entries: List<WeightEntry>) {
+private fun GoalCard(
+    goal: WeightGoal,
+    entries: List<WeightEntry>,
+    modifier: Modifier = Modifier
+) {
     val cardAlpha = if (goal.isActive) 1f else 0.6f
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         elevation = 2.dp,
     ) {
         Column(
@@ -155,13 +166,21 @@ private fun GoalCard(goal: WeightGoal, entries: List<WeightEntry>) {
             if (goal.isActive) {
                 val progressData = calculateProgress(goal, entries)
                 if (progressData != null) {
+                    val animatedProgress = remember { Animatable(0f) }
+                    LaunchedEffect(progressData.progress) {
+                        animatedProgress.animateTo(
+                            targetValue = progressData.progress,
+                            animationSpec = tween(durationMillis = 1000)
+                        )
+                    }
+
                     LinearProgressIndicator(
-                        progress = progressData.progress,
+                        progress = animatedProgress.value,
                         modifier = Modifier.fillMaxWidth()
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "${progressData.percentage.roundToInt()}% completado",
+                        text = "${(animatedProgress.value * 100).roundToInt()}% completado",
                         style = MaterialTheme.typography.caption,
                         color = MaterialTheme.colors.onSurface.copy(alpha = cardAlpha)
                     )
