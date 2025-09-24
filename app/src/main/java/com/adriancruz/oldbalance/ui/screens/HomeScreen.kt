@@ -151,7 +151,7 @@ fun HomeScreen(viewModel: MainViewModel) {
                             )
                             Spacer(modifier = Modifier.width(16.dp))
                             SummaryCard(
-                                title = "Por perder:",
+                                title = "Restante:",
                                 value = "%.1f kg".format(progressTowardsGoal),
                                 icon = Icons.Default.Flag,
                                 color = AppColors.ProgressOrange,
@@ -198,17 +198,17 @@ private fun ChartRangeSelector(
 ) {
     Row {
         ChartRangeButton(
-            text = "Semana",
+            text = "\uD83D\uDD52",
             isSelected = selectedRange == ChartRange.WEEK,
             onClick = { onRangeSelected(ChartRange.WEEK) }
         )
         ChartRangeButton(
-            text = "Mes",
+            text = "\uD83D\uDCC5",
             isSelected = selectedRange == ChartRange.MONTH,
             onClick = { onRangeSelected(ChartRange.MONTH) }
         )
         ChartRangeButton(
-            text = "Todo",
+            text = "\uD83D\uDCC8",
             isSelected = selectedRange == ChartRange.ALL,
             onClick = { onRangeSelected(ChartRange.ALL) }
         )
