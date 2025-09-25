@@ -5,7 +5,6 @@
 ![Database](https://img.shields.io/badge/DB-Room-green)  
 [![Download](https://img.shields.io/github/downloads/USUARIO/OldBalance/total?label=📦%20Descargas)](../../releases)  
 
-> ⚠️ **IMPORTANTE:** Reemplaza `USUARIO` en el enlace del badge por tu nombre de usuario de GitHub para que funcione bien.
 
 ---
 
