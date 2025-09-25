@@ -6,8 +6,24 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
+/**
+ * Clase de datos que representa el resultado de la estimacion de la fecha de llegada (ETA).
+ *
+ * @property reachable indica si el objetivo es alcanzable con la tendencia actual.
+ * @property estimatedDate la fecha estimada para alcanzar el objetivo.
+ * @property message un mensaje descriptivo sobre el resultado.
+ */
 data class EtaResult(val reachable: Boolean, val estimatedDate: LocalDate?, val message: String)
 
+/**
+ * Estima la fecha de llegada (ETA) para un objetivo de peso basandose en los registros de peso.
+ *
+ * Utiliza una regresion lineal para predecir la fecha en que se alcanzara el peso objetivo.
+ *
+ * @param entries la lista de registros de peso.
+ * @param targetKg el peso objetivo en kilogramos.
+ * @return un [EtaResult] con la informacion de la estimacion.
+ */
 fun estimateEta(entries: List<WeightEntry>, targetKg: Float): EtaResult {
     if (entries.size < 3) return EtaResult(false, null, "Datos insuficientes (mín. 3 registros).")
 
