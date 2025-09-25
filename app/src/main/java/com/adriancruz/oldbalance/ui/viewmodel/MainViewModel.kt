@@ -88,7 +88,10 @@ class MainViewModel(private val repo: WeightRepository) : ViewModel() {
     }
 
     // Estimación de ETA para un goal
-    fun getEtaForGoal(goal: WeightGoal, entries: List<WeightEntry>): com.adriancruz.oldbalance.domain.EtaResult {
+    fun getEtaForGoal(
+        goal: WeightGoal,
+        entries: List<WeightEntry>
+    ): com.adriancruz.oldbalance.domain.EtaResult {
         return com.adriancruz.oldbalance.domain.estimateEta(entries, goal.targetKg)
     }
 

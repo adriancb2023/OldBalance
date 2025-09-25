@@ -1,14 +1,37 @@
 package com.adriancruz.oldbalance.ui.screens
 
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.*
+import androidx.compose.material.Card
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -26,7 +49,6 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import kotlin.math.abs
-import androidx.compose.animation.core.tween
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -156,12 +178,23 @@ fun WeightDifference(entry: WeightEntry, previousEntry: WeightEntry?) {
             difference == null -> {
                 Text(text = "— Inicio", color = Color.Gray, fontSize = 14.sp)
             }
+
             difference < 0 -> {
-                Text(text = "↓ %.1f kg".format(abs(difference)), color = AppColors.SuccessGreen, fontSize = 14.sp)
+                Text(
+                    text = "↓ %.1f kg".format(abs(difference)),
+                    color = AppColors.SuccessGreen,
+                    fontSize = 14.sp
+                )
             }
+
             difference > 0 -> {
-                Text(text = "↑ %.1f kg".format(abs(difference)), color = AppColors.AlertRed, fontSize = 14.sp)
+                Text(
+                    text = "↑ %.1f kg".format(abs(difference)),
+                    color = AppColors.AlertRed,
+                    fontSize = 14.sp
+                )
             }
+
             else -> {
                 Text(text = "— Manteniendo", color = AppColors.ProgressOrange, fontSize = 14.sp)
             }

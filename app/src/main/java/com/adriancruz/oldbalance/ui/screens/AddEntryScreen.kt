@@ -7,16 +7,39 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.*
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Card
+import androidx.compose.material.Icon
+import androidx.compose.material.Scaffold
+import androidx.compose.material.SnackbarDuration
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.MonitorWeight
 import androidx.compose.material.icons.filled.NoteAdd
-import androidx.compose.runtime.*
+import androidx.compose.material.rememberScaffoldState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -37,7 +60,7 @@ import kotlinx.coroutines.flow.collectLatest
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.*
+import java.util.Locale
 
 @Composable
 fun AddEntryScreen(viewModel: MainViewModel) {
@@ -57,6 +80,7 @@ fun AddEntryScreen(viewModel: MainViewModel) {
                     showDialog = true
                     weightText = ""
                 }
+
                 is UiEvent.ShowSnackbar -> {
                     scaffoldState.snackbarHostState.showSnackbar(
                         message = event.message,
@@ -102,7 +126,6 @@ fun AddEntryScreen(viewModel: MainViewModel) {
                 )
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Progress Chart Card
                 Card(elevation = 0.dp, shape = com.adriancruz.oldbalance.ui.theme.Shapes.large) {
                     Column(Modifier.padding(16.dp)) {
                         Row(
@@ -116,10 +139,14 @@ fun AddEntryScreen(viewModel: MainViewModel) {
                             )
                             weeklyChange?.let {
                                 val sign = if (it > 0) "+" else ""
-                                val color = if (it > 0) AppColors.AlertRed else AppColors.SuccessGreen
+                                val color =
+                                    if (it > 0) AppColors.AlertRed else AppColors.SuccessGreen
                                 Text(
                                     text = "~ ${sign}${String.format("%.1f", it)} kg",
-                                    style = Typography.subtitle1.copy(color = color, fontWeight = FontWeight.Bold)
+                                    style = Typography.subtitle1.copy(
+                                        color = color,
+                                        fontWeight = FontWeight.Bold
+                                    )
                                 )
                             }
                         }
@@ -146,7 +173,6 @@ fun AddEntryScreen(viewModel: MainViewModel) {
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Input Fields
                 Text("Peso (kg)", style = Typography.subtitle2.copy(fontWeight = FontWeight.Bold))
                 Spacer(modifier = Modifier.height(8.dp))
                 StyledInputField(
@@ -173,7 +199,8 @@ fun AddEntryScreen(viewModel: MainViewModel) {
                 Text("Fecha", style = Typography.subtitle2.copy(fontWeight = FontWeight.Bold))
                 Spacer(modifier = Modifier.height(8.dp))
                 val formattedDate = remember(date) {
-                    val formatter = DateTimeFormatter.ofPattern("d 'de' MMMM, yyyy", Locale("es", "ES"))
+                    val formatter =
+                        DateTimeFormatter.ofPattern("d 'de' MMMM, yyyy", Locale("es", "ES"))
                     date.format(formatter)
                 }
                 StyledInputField(
@@ -191,7 +218,8 @@ fun AddEntryScreen(viewModel: MainViewModel) {
                 Button(
                     onClick = {
                         val kg = weightText.toFloatOrNull() ?: return@Button
-                        val epoch = date.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+                        val epoch =
+                            date.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
                         viewModel.addEntry(epoch, kg, null)
                     },
                     enabled = enabled,
@@ -209,7 +237,10 @@ fun AddEntryScreen(viewModel: MainViewModel) {
                             .fillMaxSize()
                             .background(
                                 Brush.horizontalGradient(
-                                    colors = listOf(AppColors.ButtonGradientStart, AppColors.ButtonGradientEnd)
+                                    colors = listOf(
+                                        AppColors.ButtonGradientStart,
+                                        AppColors.ButtonGradientEnd
+                                    )
                                 )
                             ),
                         contentAlignment = Alignment.Center

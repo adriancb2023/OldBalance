@@ -56,7 +56,7 @@ class WeightDaoTest {
         val entry1 = WeightEntry(date = 1000L, weightKg = 80.0f)
         val entry2 = WeightEntry(date = 1000L, weightKg = 81.0f) // Same date
         dao.insertEntry(entry1)
-        dao.insertEntry(entry2) // This should replace entry1
+        dao.insertEntry(entry2)
 
         val allEntries = dao.getAllEntriesFlow().first()
         assertThat(allEntries.size).isEqualTo(1)

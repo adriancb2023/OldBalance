@@ -16,7 +16,8 @@ import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 enum class ChartRange {
     WEEK, MONTH, ALL
@@ -28,8 +29,7 @@ fun WeightChart(
     entries: List<WeightEntry>,
     goals: List<WeightGoal>
 ) {
-    // Convierte el Color de Compose a ARGB de Android (Int)
-    val primaryColor = AppColors.PrimaryBlue.toArgb()  // <-- usamos AppColors
+    val primaryColor = AppColors.PrimaryBlue.toArgb()
 
     AndroidView(
         modifier = modifier,
@@ -86,8 +86,10 @@ fun WeightChart(
             dataSets.add(set)
 
             goals.forEach { goal ->
-                val lastX = entries.lastOrNull()?.date?.toFloat() ?: System.currentTimeMillis().toFloat()
-                val firstX = entries.firstOrNull()?.date?.toFloat() ?: (lastX - 7 * 24 * 3600 * 1000f)
+                val lastX =
+                    entries.lastOrNull()?.date?.toFloat() ?: System.currentTimeMillis().toFloat()
+                val firstX =
+                    entries.firstOrNull()?.date?.toFloat() ?: (lastX - 7 * 24 * 3600 * 1000f)
                 val linePoints = listOf(
                     Entry(firstX, goal.targetKg.toFloat()),
                     Entry(lastX, goal.targetKg.toFloat())

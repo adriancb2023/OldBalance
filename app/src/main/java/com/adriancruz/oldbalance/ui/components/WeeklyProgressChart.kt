@@ -19,7 +19,8 @@ import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun WeeklyProgressChart(
@@ -27,7 +28,6 @@ fun WeeklyProgressChart(
     entries: List<WeightEntry>,
 ) {
     if (entries.isEmpty()) {
-        // In a real app, you might want to show a placeholder here.
         return
     }
 
@@ -44,7 +44,6 @@ fun WeeklyProgressChart(
                     ViewGroup.LayoutParams.MATCH_PARENT
                 )
 
-                // General chart styling
                 description.isEnabled = false
                 legend.isEnabled = false
                 setTouchEnabled(false)
@@ -54,7 +53,6 @@ fun WeeklyProgressChart(
                 setDrawGridBackground(false)
                 minOffset = 0f
 
-                // X-Axis styling
                 xAxis.position = XAxis.XAxisPosition.BOTTOM
                 xAxis.setDrawGridLines(false)
                 xAxis.setDrawAxisLine(false)
@@ -79,7 +77,6 @@ fun WeeklyProgressChart(
                     }
                 }
 
-                // Y-Axis styling
                 axisLeft.isEnabled = false
                 axisRight.isEnabled = false
             }
@@ -96,7 +93,6 @@ fun WeeklyProgressChart(
                 setDrawValues(false)
                 setDrawCircles(false)
 
-                // Gradient fill
                 setDrawFilled(true)
                 fillDrawable = GradientDrawable(
                     GradientDrawable.Orientation.TOP_BOTTOM,
@@ -106,8 +102,8 @@ fun WeeklyProgressChart(
 
             chart.data = LineData(set)
             chart.xAxis.labelCount = if (points.size > 1) points.size else 1
-            chart.xAxis.axisMinimum = points.first().x - 1000 // Add some padding
-            chart.xAxis.axisMaximum = points.last().x + 1000 // Add some padding
+            chart.xAxis.axisMinimum = points.first().x - 1000
+            chart.xAxis.axisMaximum = points.last().x + 1000
 
             chart.notifyDataSetChanged()
             chart.invalidate()

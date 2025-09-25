@@ -23,26 +23,26 @@ class EtaCalculatorTest {
 
     @Test
     fun `estimateEta calculates correct date for clear downward trend`() {
-        // Trend: losing 0.1 kg per day
+
         val today = LocalDate.now()
         val entries = listOf(
             WeightEntry(date = today.minusDays(2).toEpochMilli(), weightKg = 80.2f),
             WeightEntry(date = today.minusDays(1).toEpochMilli(), weightKg = 80.1f),
             WeightEntry(date = today.toEpochMilli(), weightKg = 80.0f)
         )
-        val targetKg = 79.0f // 10 days to lose 1kg
+        val targetKg = 79.0f
         val result = estimateEta(entries, targetKg)
 
         assertTrue(result.reachable)
         assertNotNull(result.estimatedDate)
-        // ETA should be in 10 days from the last entry
+
         val expectedDate = today.plusDays(10)
         assertEquals(expectedDate, result.estimatedDate)
     }
 
     @Test
     fun `estimateEta returns unreachable for opposing trend`() {
-        // Goal is to lose weight, but trend is gaining
+
         val today = LocalDate.now()
         val entries = listOf(
             WeightEntry(date = today.minusDays(2).toEpochMilli(), weightKg = 80.0f),

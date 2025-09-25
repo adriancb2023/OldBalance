@@ -7,6 +7,7 @@ class WeightRepository(private val dao: WeightDao) {
     suspend fun addOrUpdateEntry(entry: WeightEntry) {
         if (entry.id == 0L) dao.insertEntry(entry) else dao.updateEntry(entry)
     }
+
     suspend fun deleteEntry(entry: WeightEntry) = dao.deleteEntry(entry)
 
     suspend fun deleteAllEntries() = dao.deleteAllEntries()
