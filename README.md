@@ -39,13 +39,6 @@ Con ella puedes:
 ✅ **Terminado**  
 🔍 Actualmente en fase de búsqueda y corrección de bugs.  
 
-## 📷 Capturas de pantalla  
-_(Aquí puedes añadir imágenes o GIFs de la app en funcionamiento)_  
-
-```markdown
-![Demo](ruta/a/tu/captura.png)
-```
-
 ## 💻 Ejemplo de uso  
 
 Ejemplo en **Kotlin** con **Room** para registrar un nuevo peso en la base de datos:  
